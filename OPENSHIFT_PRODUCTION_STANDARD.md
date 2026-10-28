@@ -21,6 +21,10 @@ ISO/IEC 17789:2014 is listed for historical traceability only. ISO marks it with
 
 OpenShift supplies platform mechanisms. The service provider remains responsible for people, process, facilities, contracts, risk acceptance, service levels, external dependencies, and evidence. Controls marked **External** cannot be completed by configuring OpenShift alone.
 
+## Implementation template
+
+Use [ocp_baremetal_architecture_and_deployment.md](./ocp_baremetal_architecture_and_deployment.md) to plan an Assisted Installer deployment, record its architecture, capture evidence, and complete post-installation acceptance. Copy the template per environment and replace all placeholders before approval.
+
 ## 2. Normative language, applicability, and control status
 
 **MUST**, **SHOULD**, and **MAY** are normative terms for this project standard:
