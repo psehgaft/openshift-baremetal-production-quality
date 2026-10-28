@@ -435,3 +435,7 @@ Use the documentation matching the deployed OCP release. These OCP 4.22 sources 
 13. [Machine configuration](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/machine_configuration/)
 14. [Monitoring stack for Red Hat OpenShift](https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.22/)
 15. [OpenShift Operator life cycles](https://access.redhat.com/support/policy/updates/openshift_operators)
+16. [OpenShift Container Platform Operators guide](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/operators/)
+17. [Assisted Installer optional Operators and bundles](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/customizing-with-bundles-and-operators)
+18. [OpenShift Service Mesh 3.0 sidecar injection](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-sidecar-injection)
+19. [OpenShift Service Mesh 3.0 installation and update strategies](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-installing-service-mesh)
