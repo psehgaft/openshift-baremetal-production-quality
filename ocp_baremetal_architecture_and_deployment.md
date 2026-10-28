@@ -360,7 +360,8 @@ Do not proceed while a required gate fails or a blocking dependency has no appro
 5. Confirm DHCP or static host networking.
 6. Confirm cluster-managed or user-managed networking.
 7. Confirm Operators/bundles needed at installation (for example, ODF or OpenShift Virtualization); check exact-release and platform support.
-8. Confirm whether extra manifests/patches are required and have been reviewed.\n9. Decide which optional Operators are genuinely required. Confirm their supported status for the selected release and platform, dependencies, entitlement, install method, and day-2 owner. Some options may be better installed after cluster creation. Never select a Developer Preview or Technology Preview for production.
+8. Confirm whether extra manifests/patches are required and have been reviewed.
+9. Decide which optional Operators are genuinely required. Confirm their supported status for the selected release and platform, dependencies, entitlement, install method, and day-2 owner. Some options may be better installed after cluster creation. Never select a Developer Preview or Technology Preview for production.
 
 **Selected mode:** {{WEB_ASSISTED_INSTALLER}}  
 **Release / architecture / topology:** {{VALUES}}  
@@ -376,9 +377,11 @@ Do not proceed while a required gate fails or a blocking dependency has no appro
 2. Navigate to Red Hat OpenShift / Create cluster in the current console menu.
 3. Select Datacenter and the Assisted Installer workflow. Confirm the intended OCP version and platform.
 4. Enter cluster name, base domain, target release/version, CPU architecture, and cluster type.
-5. Select approved networking and optional product choices. Review the optional Operator/bundle page against Section 3.8; record selected and declined items. Bundle selection can install related Operators with additional dependencies.\n6. Before choosing an Operator, verify the exact version, platform support, bundle contents, entitlement, and production support status in the current product documentation. If the installer marks an option Developer Preview or Technology Preview, do not select it for production; use a supported post-install procedure if available.\n7. Record the UI summary and intended day-2 configuration. Advanced configuration may need to be applied after installation.
-6. Review defaults. Compare each relevant value with the IPAM-approved plan and architecture decisions.
-7. Record the cluster ID and creation timestamp. Do not record API tokens.
+5. Select approved networking and optional product choices. Review the optional Operator/bundle page against Section 3.8; record selected and declined items. Bundle selection can install related Operators with additional dependencies.
+6. Before choosing an Operator, verify the exact version, platform support, bundle contents, entitlement, and production support status in the current product documentation. If the installer marks an option Developer Preview or Technology Preview, do not select it for production; use a supported post-install procedure if available.
+7. Record the UI summary and intended day-2 configuration. Advanced configuration may need to be applied after installation.
+8. Review defaults. Compare each relevant value with the IPAM-approved plan and architecture decisions.
+9. Record the cluster ID and creation timestamp. Do not record API tokens.
 
 | Console field | Planned value | Actual value | Verified |
 |---|---|---|---|
@@ -727,7 +730,9 @@ Screenshots are supporting evidence only. Store originals in a controlled reposi
 | IMG-08 | Preinstallation validation | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | IMG-09 | Final review | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | IMG-10 | Installation progress | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
-| IMG-11 | Successful installation | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |\n| IMG-12 | Service mesh control plane / injected sidecar, if used | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |\n| IMG-13 | Operator selection/subscriptions | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
+| IMG-11 | Successful installation | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
+| IMG-12 | Service mesh control plane / injected sidecar, if used | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
+| IMG-13 | Operator selection/subscriptions | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | DIA-01 | Architecture context | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | DIA-02 | Physical deployment/network | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | DIA-03 | Security/trust/data flow | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
@@ -791,7 +796,11 @@ Use documentation for the exact OCP release. Red Hat may revise UI labels and su
 3. [About the Assisted Installer](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/about-ai)
 4. [Installing with the Assisted Installer web console](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/installing-with-ui)
 5. [Booting hosts with the discovery image](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_booting-hosts-with-the-discovery-image)
-6. [Preinstallation validations](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_preinstallation-validations)\n7. [Customizing Assisted Installer deployments using Operators and bundles](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/customizing-with-bundles-and-operators)\n8. [OpenShift Service Mesh 3.0 sidecar injection](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-sidecar-injection)\n9. [OpenShift Service Mesh 3.0 installation and update strategies](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-installing-service-mesh)\n10. [OpenShift Container Platform Operators guide](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/operators/)
+6. [Preinstallation validations](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_preinstallation-validations)
+7. [Customizing Assisted Installer deployments using Operators and bundles](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/customizing-with-bundles-and-operators)
+8. [OpenShift Service Mesh 3.0 sidecar injection](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-sidecar-injection)
+9. [OpenShift Service Mesh 3.0 installation and update strategies](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-installing-service-mesh)
+10. [OpenShift Container Platform Operators guide](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/operators/)
 
 ### 14.2 Bare-metal and production readiness
 
