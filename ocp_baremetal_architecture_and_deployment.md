@@ -40,7 +40,7 @@
 - Save screenshots and diagrams next to this document under images/{{CLUSTER_NAME}}/. Use numbered filenames such as 01-cluster-details.png, 02-hosts-discovered.png, and 03-preinstall-validation.png.
 - At each image marker, insert Markdown image syntax with a relative link, for example: ![Cluster details](./images/cluster-name/02-cluster-details.png). Record capture date, step, and owner in the evidence index.
 - Capture only what is needed. Redact access tokens, passwords, private keys, kubeconfig content, BMC credentials, personal data, and sensitive customer details before saving or sharing images.
-- Assisted Installer UI labels can change between releases. Follow the exact-release Red Hat documentation in Section 17; if a control differs, record its displayed label and approved choice.
+- Assisted Installer UI labels can change between releases. Follow the exact-release Red Hat documentation in Section 14; if a control differs, record its displayed label and approved choice.
 
 ## 1. Executive summary
 
@@ -207,6 +207,81 @@ Fill with IPAM-approved values. Check all ranges for overlap with connected netw
 - Backup destination, immutability, access controls: {{REFERENCE}}
 - Incident, change, upgrade, maintenance, support runbooks: {{REFERENCE}}
 
+### 3.7 Service Mesh / Sidecar design
+
+Complete this section when the cluster will run a service mesh. If the answer is no, record the rationale and future trigger.
+
+**Service mesh required?** {{YES/NO}}  
+**Use case / workloads:** {{SERVICE-TO-SERVICE_IDENTITY | MTLS | TRAFFIC_POLICY | TELEMETRY | OTHER}}  
+**Selected product/version and OCP compatibility evidence:** {{PRODUCT_VERSION_AND_REFERENCE}}  
+**Production feature status:** {{GA_AND_SUPPORTED | NOT_APPROVED_FOR_PRODUCTION}}  
+**Mode:** {{SIDE-CAR | OTHER_SUPPORTED_MODE}}  
+**Control-plane namespace / Istio resource:** {{VALUES}}  
+**IstioRevision and update strategy:** {{REVISION / IN-PLACE_OR_REVISION-BASED}}  
+**Application namespaces/workloads in scope:** {{NAMESPACES_AND_SERVICES}}  
+**Excluded namespaces/workloads and rationale:** {{DETAILS}}  
+**Injection control:** {{NAMESPACE_LABEL | POD_TEMPLATE_LABEL}}  
+**Source of truth for labels/custom resources:** {{GITOPS_PATH}}  
+**Ingress/egress gateways and external dependencies:** {{DETAILS}}  
+**mTLS target, workload authorization, certificate issuer/rotation:** {{POLICY_REFERENCE}}  
+**NetworkPolicy/firewall/API-gateway interaction:** {{DESIGN_REFERENCE}}  
+**Proxy CPU/memory/ephemeral resource budget:** {{VALUES_AND_TEST}}  
+**PDB, probes, graceful termination, topology spread:** {{REFERENCE}}  
+**Mesh metrics/logs/alerts, retention and access policy:** {{REFERENCE}}  
+**Upgrade, rollback, onboarding and decommission runbooks:** {{REFERENCE}}
+
+Injection is applied when pods are created. Plan a controlled rollout after changing namespace membership or revision labels, then verify the injected proxy in each workload pod. Do not enable injection for all namespaces by default. Service Mesh does not replace OpenShift NetworkPolicy, perimeter firewalling, an API gateway, or application authorization.
+
+Supported illustrative checks:
+
+~~~bash
+oc get istio -A
+oc get istiorevisions
+oc describe pod <pod-name> -n <application-namespace>
+~~~
+
+Example for an approved non-default revision (confirm exact value and supported label syntax in the installed product guide):
+
+~~~bash
+oc label namespace <application-namespace> istio.io/rev=<revision-name>
+~~~
+
+**Image slot — service mesh architecture and trust boundaries**  
+<!-- Insert: ![Service mesh architecture](./images/{{CLUSTER_NAME}}/mesh-architecture.png) -->
+
+**Image slot — injected sidecar and revision verification**  
+<!-- Insert: ![Injected sidecar](./images/{{CLUSTER_NAME}}/mesh-sidecar-verification.png) -->
+
+### 3.8 Common Operator selection and inventory
+
+Operators are not all equivalent. Distinguish CVO-managed OpenShift platform operators from optional add-on Operators managed through OLM/OperatorHub. This catalog is a decision aid, not a deployment mandate. Confirm the target release, architecture, support state, entitlement, catalog source, dependencies, and installation method before selecting an Operator. Do not install an option for production if the current installation workflow marks it Developer Preview or Technology Preview.
+
+| Operator / capability | Use case | Needed? | Install phase | Version/channel | Namespace/scope | Owner / support |
+|---|---|---|---|---|---|---|
+| Core ClusterOperators managed by CVO | Cluster platform functions; inventory only | {{N/A - PLATFORM MANAGED}} | Installed with OCP | {{RELEASE}} | Cluster | {{PLATFORM OWNER}} |
+| OpenShift GitOps | Declarative deployment / drift reconciliation | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| OpenShift Pipelines | Tekton CI/CD | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| OpenShift Logging | Log collection/forwarding | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| OpenShift Service Mesh | Service identity, mTLS, traffic policy, telemetry | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| ODF | Software-defined storage | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| Local Storage Operator (LSO) | Local persistent volumes | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| Logical Volume Manager Storage | Local LVM-backed storage | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| Kubernetes NMState | Day-2 node networking | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| MetalLB | LoadBalancer IPs on bare metal | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| OADP | Backup integration | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| Compliance Operator | Compliance scanning | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| cert-manager | Workload certificate lifecycle | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| OpenShift Virtualization | VM workloads | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| NFD / SR-IOV Network Operator | Hardware discovery / high-performance networking | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+| Other vendor/community Operator | {{USE CASE}} | {{YES/NO}} | {{INSTALL/DAY 2}} | {{VALUE}} | {{VALUE}} | {{OWNER}} |
+
+For every selected Operator, document its publisher/catalog, exact release compatibility, required permissions and CRDs, resource/capacity impact, dependencies, upgrade approval strategy, backup/export and removal behavior, monitoring, and support contacts. Add the architecture decision and change record here: {{LINKS}}.
+
+**Assisted Installer optional selection decision:** {{LIST_SELECTED_AND_DECLINED}}  
+**If selecting via Assisted Installer:** confirm the current UI status for the exact release and platform; Developer Preview/Technology Preview selections are not approved for production.  
+**Image slot — Operator selection / subscription inventory**  
+<!-- Insert: ![Operator inventory](./images/{{CLUSTER_NAME}}/operator-inventory.png) -->
+
 ## 4. Installation prerequisites and go/no-go
 
 Complete and approve before creating the cluster in the Assisted Installer.
@@ -285,7 +360,7 @@ Do not proceed while a required gate fails or a blocking dependency has no appro
 5. Confirm DHCP or static host networking.
 6. Confirm cluster-managed or user-managed networking.
 7. Confirm Operators/bundles needed at installation (for example, ODF or OpenShift Virtualization); check exact-release and platform support.
-8. Confirm whether extra manifests/patches are required and have been reviewed.
+8. Confirm whether extra manifests/patches are required and have been reviewed.\n9. Decide which optional Operators are genuinely required. Confirm their supported status for the selected release and platform, dependencies, entitlement, install method, and day-2 owner. Some options may be better installed after cluster creation. Never select a Developer Preview or Technology Preview for production.
 
 **Selected mode:** {{WEB_ASSISTED_INSTALLER}}  
 **Release / architecture / topology:** {{VALUES}}  
@@ -301,7 +376,7 @@ Do not proceed while a required gate fails or a blocking dependency has no appro
 2. Navigate to Red Hat OpenShift / Create cluster in the current console menu.
 3. Select Datacenter and the Assisted Installer workflow. Confirm the intended OCP version and platform.
 4. Enter cluster name, base domain, target release/version, CPU architecture, and cluster type.
-5. Select approved networking and optional product choices.
+5. Select approved networking and optional product choices. Review the optional Operator/bundle page against Section 3.8; record selected and declined items. Bundle selection can install related Operators with additional dependencies.\n6. Before choosing an Operator, verify the exact version, platform support, bundle contents, entitlement, and production support status in the current product documentation. If the installer marks an option Developer Preview or Technology Preview, do not select it for production; use a supported post-install procedure if available.\n7. Record the UI summary and intended day-2 configuration. Advanced configuration may need to be applied after installation.
 6. Review defaults. Compare each relevant value with the IPAM-approved plan and architecture decisions.
 7. Record the cluster ID and creation timestamp. Do not record API tokens.
 
@@ -652,7 +727,7 @@ Screenshots are supporting evidence only. Store originals in a controlled reposi
 | IMG-08 | Preinstallation validation | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | IMG-09 | Final review | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | IMG-10 | Installation progress | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
-| IMG-11 | Successful installation | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
+| IMG-11 | Successful installation | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |\n| IMG-12 | Service mesh control plane / injected sidecar, if used | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |\n| IMG-13 | Operator selection/subscriptions | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | DIA-01 | Architecture context | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | DIA-02 | Physical deployment/network | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
 | DIA-03 | Security/trust/data flow | {{PATH_OR_LINK}} | {{DATE}} | {{NAME}} | {{YES/NO}} |
@@ -716,7 +791,7 @@ Use documentation for the exact OCP release. Red Hat may revise UI labels and su
 3. [About the Assisted Installer](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/about-ai)
 4. [Installing with the Assisted Installer web console](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/installing-with-ui)
 5. [Booting hosts with the discovery image](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_booting-hosts-with-the-discovery-image)
-6. [Preinstallation validations](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_preinstallation-validations)
+6. [Preinstallation validations](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/assembly_preinstallation-validations)\n7. [Customizing Assisted Installer deployments using Operators and bundles](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/customizing-with-bundles-and-operators)\n8. [OpenShift Service Mesh 3.0 sidecar injection](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-sidecar-injection)\n9. [OpenShift Service Mesh 3.0 installation and update strategies](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-installing-service-mesh)\n10. [OpenShift Container Platform Operators guide](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/operators/)
 
 ### 14.2 Bare-metal and production readiness
 
