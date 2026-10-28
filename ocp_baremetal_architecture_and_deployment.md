@@ -671,6 +671,8 @@ oc get events -A --sort-by=.lastTimestamp
 - [ ] Logs are forwarded to durable external storage with required access and retention.
 - [ ] Image registry, scanning, and promotion policies are operational.
 - [ ] No cluster/application secrets are present in Git or deployment evidence.
+- [ ] If a mesh is used: injection is scoped to approved workloads; expected sidecars and IstioRevision are verified; mTLS/authorization, resource overhead, alerts, and rollback are tested.
+- [ ] If Operators are installed: catalog source, publisher, compatibility, entitlement, owner, scope, privileges, dependencies, update strategy, and removal plan are recorded.
 
 **Security review:** {{LINK}}  
 **Alert delivery test:** {{LINK}}  
