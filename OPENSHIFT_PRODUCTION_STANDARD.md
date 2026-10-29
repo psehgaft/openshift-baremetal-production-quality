@@ -186,9 +186,102 @@ The controls below form the project’s minimum implementation baseline. Each ro
 | CHG-02 | MUST have a supported update plan; cluster downgrade MUST NOT be treated as rollback. | Update graph/channel and ClusterVersion conditions; release-specific update procedure. | Pre-update health/capacity/backup review, staging where available, upgrade runbook, support case criteria. |
 | OPS-01 | MUST operate incidents, problems, requests, configuration/inventory, capacity, and continual improvement as a service. | OCP events, alerts, APIs, audit trail and automation hooks. | Service-management process, ticket/CMDB/paging integrations, owners, reports, support entitlement and runbooks. |
 | PORT-01 | MUST document portability limits and exit/rebuild approach for workloads, data, operators, network and storage dependencies. | Declarative Kubernetes/OpenShift APIs, GitOps, OCI images and standard CSI/CNI interfaces where applicable. | Tested export/rebuild path, dependency inventory, vendor lock-in review, data export/retention/deletion process. |
+| MESH-01 | MUST assess service-mesh need and use only an OCP/RHOSSM combination supported for the target release and production use. Mesh is optional, not a default. | RHOSSM/Istio for workload identity, traffic policy, mTLS and telemetry. | Approved use case, compatibility/entitlement, owner and architecture decision. |
+| MESH-02 | MUST opt workloads into sidecar injection by approved namespace or workload labels and associate them with an intentional IstioRevision. Exclude platform namespaces unless supported and approved. | RHOSSM Operator, Istio resources, revision labels and injection controls. | Version-controlled membership/label inventory and verification of injected pods and control-plane association. |
+| MESH-03 | MUST define workload identity, mTLS mode, authorization, certificates/trust, gateways and NetworkPolicy interaction. Stage strict enforcement. | Istio security policies/gateways and OCP NetworkPolicy. | Threat model, certificate owner, policy tests, exception record; mesh does not replace perimeter controls. |
+| MESH-04 | MUST budget proxy resources and validate probes, startup/shutdown, connection drain, PDBs, topology and application performance. | Sidecars are injected into application pods and consume pod/node resources. | Capacity and load tests, resource budgets, rollout/PDB review, application-owner sign-off. |
+| MESH-05 | MUST monitor mesh/proxy health, traffic, certificate expiry, policy denials and resource use; control telemetry/log access and retention. | Mesh metrics/log integrations with supported OCP observability. | Dashboards, alert owner, retention/access policy and incident runbooks. |
+| MESH-06 | MUST stage control-plane and sidecar upgrades with a supported RHOSSM strategy and tested recovery path. | RHOSSM Operator update strategy and revision management. | Compatibility, staged upgrade, revision migration, rollback and decommission evidence. |
+| OPR-01 | MUST inventory purpose, owner, catalog/source, version/channel, scope, dependencies, support status and lifecycle for every Operator. | CVO manages core ClusterOperators; OLM/OperatorHub manages add-ons. | Approved catalog, entitlement/support review, change record and inventory export. |
+| OPR-02 | MUST distinguish core, Red Hat, certified vendor and community Operators; do not independently install/update CVO-managed core Operators. | ClusterOperator/CVO and OLM lifecycle mechanisms. | Support boundary, source trust, owner and cluster inventory review. |
+| OPR-03 | MUST install only use-case-justified Operators supported for exact OCP release/platform and tested for security, resource, update and uninstall impact. | OperatorHub/OLM or an explicitly supported Assisted Installer option. | Compatibility matrix, stage test, privilege/dependency review, maintenance and recovery plan. |
+| OPR-04 | MUST assign an operational owner/runbook for Operator custom resources, CRDs, credentials, upgrades and decommissioning. | Reviewed GitOps/configuration for custom resources and subscriptions. | Access review, backup/export, support contact, alerting and update/rollback runbook. |
 | RSK-01 | MUST maintain a risk and exception register tied to concerns, architecture decisions, controls, owners, and review dates. | Cluster evidence and configuration can support technical risk monitoring. | Risk owner, risk acceptance, assurance/audit process, remediation tracking and expiry enforcement. |
 
-## 8. Minimum operational procedures
+## 8. Service Mesh / Sidecar Management
+
+Service Mesh is optional. Use it when a workload needs service-to-service identity, mutual TLS, traffic policy, or mesh telemetry. It adds a proxy and control-plane lifecycle to application operations, so injection MUST NOT be enabled cluster-wide by default.
+
+### 8.1 Design and membership
+
+- Record the service-mesh use case, product/version, OCP compatibility, entitlement, support status, control-plane namespace, member namespaces, gateways, external dependencies, and owner.
+- Select sidecar mode or another generally available and supported production mode. Do not use Developer Preview or Technology Preview features for production workloads.
+- Sidecar injection MUST be opt-in, scoped to approved application namespaces or pod templates, and associated with the intended IstioRevision. Do not assume the revision is named default.
+- Exclude platform/system namespaces unless the product documentation supports that use and the platform owner approves it.
+- Keep namespace/workload membership labels and Istio custom resources in reviewed version control.
+- A namespace label affects newly created pods; use an approved rollout to recreate pods and verify the actual pod contains the expected proxy.
+
+Illustrative checks; validate commands and label syntax against the installed RHOSSM release:
+
+~~~bash
+oc get istio -A
+oc get istiorevisions
+oc describe pod <pod-name> -n <application-namespace>
+~~~
+
+For a non-default control-plane revision, RHOSSM commonly uses a revision label in the form istio.io/rev=<revision-name>. Confirm the exact revision and label precedence before applying changes.
+
+### 8.2 Security, reliability, lifecycle, and evidence
+
+- MUST define workload identity, mTLS mode, authorization, certificate issuer/trust/rotation, gateway exposure, and egress.
+- MUST stage the transition to strict mTLS; test all dependencies before enforcement.
+- MUST document interaction with NetworkPolicy, ingress, external load balancers, firewall, API gateway/WAF, and application authorization. Mesh does not replace these controls.
+- MUST budget CPU, memory, ephemeral storage and network overhead for proxies and control plane; include this in capacity, autoscaling, probes and performance testing.
+- MUST validate readiness/startup/shutdown behavior, connection draining, PDBs, topology spread, rolling upgrades, and workload availability with proxies injected.
+- MUST monitor control-plane and proxy health, traffic errors/latency, certificate expiry, policy denials and resource saturation. Protect telemetry and log retention.
+- MUST stage control-plane and sidecar updates with the supported RHOSSM strategy. Maintain onboarding, upgrade, rollback, incident, and decommission runbooks.
+
+| Design item | Selected value / evidence |
+|---|---|
+| Product/version, OCP compatibility and entitlement | {{REFERENCE}} |
+| Use case and workload namespaces | {{REFERENCE}} |
+| Control plane / IstioRevision / update strategy | {{VALUE}} |
+| Injection labels, source repository and exclusions | {{REFERENCE}} |
+| Identity, mTLS, authorization, certificates | {{REFERENCE}} |
+| Gateways, NetworkPolicy and egress | {{REFERENCE}} |
+| Proxy resources, availability/performance test | {{REFERENCE}} |
+| Monitoring, alerts, telemetry access/retention | {{REFERENCE}} |
+| Upgrade, rollback and removal runbooks | {{REFERENCE}} |
+
+## 9. Common OpenShift Operators
+
+This is a planning catalog, not a mandatory installation list. An Operator MUST have a justified use case, support/compatibility check for the exact OCP release/platform, an owner, resource/security review, and an upgrade/removal plan.
+
+### 9.1 Operator classes
+
+1. **Core ClusterOperators:** OCP functions managed by the Cluster Version Operator (CVO). Inventory them; do not install duplicate versions from OperatorHub or independently manage their lifecycle.
+2. **Red Hat add-on Operators:** use the product’s documented installation path and confirm entitlement and support lifecycle.
+3. **Certified vendor Operators:** validate certification, vendor support scope, data access, privileges, dependencies, and compatibility.
+4. **Community Operators:** treat as community-maintained unless the current listing explicitly establishes otherwise; require additional risk and lifecycle review before production.
+5. **Assisted Installer selections:** availability and support status depend on release/platform. Do not use an option marked Developer Preview or Technology Preview for production. If advanced configuration is needed, install after cluster creation only using a supported product procedure.
+
+### 9.2 Common optional Operators by use case
+
+| Operator / capability | Typical use | Bare-metal design consideration |
+|---|---|---|
+| OpenShift GitOps | Declarative app/platform delivery and drift reconciliation | Protect repository credentials; define bootstrap, ownership and recovery. |
+| OpenShift Pipelines | Tekton CI/CD | Isolate builders; govern registry secrets, provenance, artifacts and resource quotas. |
+| OpenShift Logging | Workload/platform log collection and forwarding | Select a supported backend, external durability, retention and access controls. |
+| OpenShift Service Mesh | Service identity, mTLS, traffic management and telemetry | Apply Section 8; verify supported version and installation path. |
+| OpenShift Data Foundation (ODF) | Software-defined block/file/object storage | Validate disks, failure domains, network, capacity, licensing and storage operations. |
+| Local Storage Operator (LSO) | Local persistent volumes from node-attached devices | Local volumes are node-bound; document placement and node/disk-loss recovery. |
+| Logical Volume Manager Storage (LVMS) | Local LVM-backed storage for supported use cases | Validate topology and limits; do not treat it as shared or replicated storage. |
+| Kubernetes NMState | Declarative Day-2 node networking | Review interfaces, bridges, VLANs, routes, MTU and Machine Config interaction. |
+| MetalLB | LoadBalancer service IPs on bare metal | Approve address pools and L2/BGP design. It does not automatically replace API/Ingress load balancing. |
+| OpenShift API for Data Protection (OADP) | Cluster/application backup integrations | Test application consistency, object storage, credentials, retention and restore. |
+| Compliance Operator | Scan against selected compliance profiles | Choose applicable profiles; triage and test remediations before enforcement. |
+| cert-manager | Workload certificate issuance/renewal | Validate issuer trust and renewal alerts; distinguish it from OCP platform certificate management. |
+| OpenShift Virtualization | Run VMs on OCP | Validate CPU, storage/network, migration, backup and support requirements. |
+| Node Feature Discovery / SR-IOV Network Operator | Hardware discovery and high-performance networking | Use for explicit workload requirements; validate NIC/switch config, device resources and node lifecycle. |
+| Red Hat Quay | Enterprise image registry | Plan persistent/object storage, database, TLS, identity, scanning, backup and mirroring. |
+
+“Common” does not mean required, included in every SKU, or supported in every topology. Confirm the current OperatorHub/catalog listing, product documentation, entitlement, Red Hat Ecosystem Catalog, and support policy.
+
+### 9.3 Operator inventory
+
+For every installed Operator, maintain: product/name and publisher; source/catalog; use case/decision; supported OCP versions/architecture/platform; entitlement; channel/version/update approval; namespace/scope; CRDs/custom resources/dependencies; RBAC/secrets/webhooks/network/storage access; capacity impact; service owner/support contact; monitoring; backup/export; upgrade/rollback/decommission procedure; last and next compatibility review.
+
+## 10. Minimum operational procedures
 
 The service provider MUST maintain version-controlled, release-aligned procedures for:
 
@@ -205,9 +298,9 @@ The service provider MUST maintain version-controlled, release-aligned procedure
 11. Emergency configuration changes, GitOps drift reconciliation, and post-incident review.
 12. Capacity threshold review, scaling, and service/customer communication.
 
-## 9. Production acceptance and verification
+## 11. Production acceptance and verification
 
-### 9.1 Acceptance gates
+### 11.1 Acceptance gates
 
 A production environment MUST NOT be handed over until:
 
@@ -221,7 +314,7 @@ A production environment MUST NOT be handed over until:
 - Runbooks, service catalog, service owners, support contacts, and customer responsibilities are published.
 - Risks, assumptions, limitations, and decisions are approved and traceable.
 
-### 9.2 Suggested OCP health snapshot
+### 11.2 Suggested OCP health snapshot
 
 Run with an authorized account and attach output or a suitably redacted summary to the acceptance record. This is point-in-time evidence, not a full audit:
 
@@ -235,7 +328,7 @@ oc get pods -A
 oc get events -A --sort-by=.lastTimestamp
 ~~~
 
-### 9.3 Assessment record
+### 11.3 Assessment record
 
 For every assessment, record:
 
@@ -249,11 +342,11 @@ For every assessment, record:
 | Finding | Gap, impact/risk, corrective action, owner, target date, retest result |
 | Approval | Assessor, control owner, risk owner, approval date, next review |
 
-## 10. Project architecture description template
+## 12. Project architecture description template
 
 Copy and complete this template for each environment. “TBD” is not a production acceptance value.
 
-### 10.1 Identification
+### 12.1 Identification
 
 - Environment / cluster name:
 - Service owner:
@@ -263,7 +356,7 @@ Copy and complete this template for each environment. “TBD” is not a product
 - Service model and deployment model:
 - Scope and exclusions:
 
-### 10.2 Stakeholders and concerns
+### 12.2 Stakeholders and concerns
 
 | Stakeholder | Role | Concerns | Required view / evidence | Owner |
 |---|---|---|---|---|
@@ -274,7 +367,7 @@ Copy and complete this template for each environment. “TBD” is not a product
 | Application owners | TBD | Performance, deployment, data, recovery | Workload and data views | TBD |
 | Auditor / assessor | TBD | Scope, criteria, evidence, findings | Assessment record | TBD |
 
-### 10.3 Architecture viewpoints and views
+### 12.3 Architecture viewpoints and views
 
 | View ID | Viewpoint / concern set | Model or diagram | Source of truth | Approval |
 |---|---|---|---|---|
@@ -287,13 +380,13 @@ Copy and complete this template for each environment. “TBD” is not a product
 | V-RES | Failure domains, degraded modes, dependencies, RTO/RPO | Recovery/dependency diagram | TBD | TBD |
 | V-LCM | GitOps, updates, Operators, drift, retirement | Lifecycle/change flow | TBD | TBD |
 
-### 10.4 Architecture decisions and correspondence
+### 12.4 Architecture decisions and correspondence
 
 For each architecture decision, record: ID; date; context/concern; decision; alternatives; consequences; evidence; approver; related controls; affected view IDs; review trigger.
 
 For each major requirement or risk, record: ID; stakeholder concern; architecture view; decision; implementation control ID; evidence location; assessment result.
 
-## 11. Supporting implementation standards and references
+## 13. Supporting implementation standards and references
 
 Supporting standards provide organization-level or domain-specific criteria. They do not become OpenShift configuration requirements unless the service scope and risk assessment make them applicable.
 
@@ -307,9 +400,9 @@ Supporting standards provide organization-level or domain-specific criteria. The
 
 A security baseline such as a release-matched Center for Internet Security (CIS) OpenShift benchmark MAY be used as a technical hardening reference if the organization has selected it. Record the exact benchmark version, compatibility, exceptions, and validation method. Do not represent a CIS benchmark as an ISO standard or apply settings that conflict with Red Hat support guidance.
 
-## 12. References
+## 14. References
 
-### 12.1 ISO and IEC sources
+### 14.1 ISO and IEC sources
 
 1. [ISO/IEC 17789:2014 — official status page; withdrawn and successor identified](https://www.iso.org/standard/60545.html)
 2. [ISO/IEC 22123-1:2023 — Cloud computing vocabulary](https://www.iso.org/standard/82758.html)
@@ -323,7 +416,7 @@ A security baseline such as a release-matched Center for Internet Security (CIS)
 10. [ISO 22301:2019 — Business continuity management systems](https://www.iso.org/standard/75106.html)
 11. [ISO/IEC 20000-1:2018 — Service management system requirements](https://www.iso.org/standard/70636.html)
 
-### 12.2 Red Hat implementation sources
+### 14.2 Red Hat implementation sources
 
 Use the documentation matching the deployed OCP release. These OCP 4.22 sources are an initial reference set for this draft; confirm the current supported release and replace the version in links during environment onboarding.
 
@@ -342,3 +435,7 @@ Use the documentation matching the deployed OCP release. These OCP 4.22 sources 
 13. [Machine configuration](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/machine_configuration/)
 14. [Monitoring stack for Red Hat OpenShift](https://docs.redhat.com/en/documentation/monitoring_stack_for_red_hat_openshift/4.22/)
 15. [OpenShift Operator life cycles](https://access.redhat.com/support/policy/updates/openshift_operators)
+16. [OpenShift Container Platform Operators guide](https://docs.redhat.com/en/documentation/openshift_container_platform/4.22/html/operators/)
+17. [Assisted Installer optional Operators and bundles](https://docs.redhat.com/en/documentation/assisted_installer_for_openshift_container_platform/2026/html/installing_openshift_container_platform_with_the_assisted_installer/customizing-with-bundles-and-operators)
+18. [OpenShift Service Mesh 3.0 sidecar injection](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-sidecar-injection)
+19. [OpenShift Service Mesh 3.0 installation and update strategies](https://docs.redhat.com/en/documentation/red_hat_openshift_service_mesh/3.0/html/installing/ossm-installing-service-mesh)
