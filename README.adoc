@@ -1,131 +1,111 @@
-== Solution patterns site template 
+= OpenShift Bare-Metal Production Standard
+:toc:
+:toclevels: 2
 
-This is a template used to generate new solution pattern pages with the same look and feel of the existing solution patterns and https://redhat-solution-patterns.github.io/[main page] .
+A reusable production architecture and implementation profile for Red Hat
+OpenShift Container Platform (OCP) services deployed on bare-metal
+infrastructure.
 
-What's in this doc:
+== The standard
 
-* <<How to create a new solution pattern page>> 
-* <<Development Quickstart>>
-** <<Clone and install the new project>>
-** <<Run and preview the website>>
-* <<How to add my new solution pattern to the main page menu>>
-* <<Learn more>>
+The core document is
+link:OPENSHIFT_PRODUCTION_STANDARD.md[OPENSHIFT_PRODUCTION_STANDARD.md]:
 
-=== How to create a new solution pattern page
+* *Document ID:* OCP-BM-STD-001
+* *Version:* 0.2
+* *Status:* Draft for architecture and control-owner review
+* *Applies to:* Production Red Hat OpenShift Container Platform services
+deployed on bare-metal infrastructure
+* *Review cadence:* Annually, and on material changes to the OCP release,
+service scope, architecture, risk, or applicable standards
 
-To create a new solution pattern page:
+It combines a cloud reference-architecture view aligned to
+ISO/IEC 22123-3:2023, an architecture description structure aligned to
+ISO/IEC/IEEE 42010:2022, and a set of implementation and evidence controls
+mapped to OpenShift capabilities and the surrounding service organization.
 
-. Access to https://github.com/redhat-solution-patterns/courseware-template;
-. Click on the `Use this template` green button;
-. Type the name of your new sp, e.g. "solution-pattern-xy-z".
-* It's recommended that you are the owner of the repository during the initial phases of development;
-. Click on the `Create repository from template` green button
-You should have a new repository with the required files and configurations to get started with content development.
+This is a standards-aligned implementation profile, not an ISO
+certification or conformity assessment: conformity requires an agreed
+scope, the complete applicable normative texts, documented architecture,
+implemented controls, objective evidence, and assessment by the
+responsible organization. Controls marked *External* cannot be completed
+by configuring OpenShift alone.
 
-=== Development Quickstart
+The standard covers:
 
-This section offers a basic tutorial to teach you how to set up the generated project, and preview it locally. A more comprehensive can be found in the documentation at docs.antora.org.
+1. Purpose and conformance statement
+2. Normative language, applicability, and control status
+3. Standards register and interpretation
+4. System of interest and architecture context
+5. Architecture description structure aligned to ISO/IEC/IEEE 42010
+6. ISO/IEC 22123-3 cloud reference architecture mapping
+7. Implementation control register
+8. Service Mesh / Sidecar management
+9. Common OpenShift Operators
+10. Minimum operational procedures
+11. Production acceptance and verification
+12. Project architecture description template
+13. Supporting implementation standards and references
+14. References
 
-[#prereqs]
-==== Prerequisites
-To preview and bundle the default UI, you need the following software on your computer:
+== Repository contents
 
-* git (command: git)
-* Node.js (commands: node and npm)
-* Gulp CLI (command: gulp)
+[cols="1,3"]
+|===
+| File | Description
 
-===== Node.js
+| link:OPENSHIFT_PRODUCTION_STANDARD.md[OPENSHIFT_PRODUCTION_STANDARD.md]
+| The production standard itself (OCP-BM-STD-001, v0.2).
 
-In this guide, we'll be installing Node.js 10.
+| link:ocp_baremetal_architecture_and_deployment.md[ocp_baremetal_architecture_and_deployment.md]
+| Fillable architecture description and deployment record for a production
+OCP bare-metal cluster installed with the web-based Assisted Installer.
 
-While you can install Node.js from the official packages, we strongly recommend that you use {url-nvm}[nvm] (Node Version Manager) to manage your Node.js installation(s).
-Follow the {url-nvm-install}[nvm installation instructions] to set up nvm on your machine.
+| link:documentation/[documentation/]
+| Antora documentation site sources for the solution-pattern presentation
+of this content.
 
-Once you've installed nvm, open a new terminal and install Node.js 10 using the following command:
+| link:site.yml[site.yml], link:site.sh[site.sh]
+| Antora site playbook and local build script.
 
- $ nvm install 10
+| link:LICENSE[LICENSE]
+| Apache License 2.0.
+|===
 
-You can switch to this version of Node.js at any time using the following command:
+== How to use it
 
- $ nvm use 10
+1. Read the standard to agree the scope, architecture, and control
+register for the platform service.
+2. Copy
+link:ocp_baremetal_architecture_and_deployment.md[ocp_baremetal_architecture_and_deployment.md]
+once per environment and replace every `{{PLACEHOLDER}}` before approval.
+3. Plan the Assisted Installer deployment, record the architecture,
+capture evidence, and complete the post-installation acceptance
+checklists in the copied record.
+4. Store the final, approved record with the change and installation
+evidence.
 
-To make Node.js 10 the default in new terminals, type:
+== Build and preview the documentation site
 
- $ nvm alias default 10
+Prerequisites: `git`, Node.js, and the Gulp CLI (`npm install -g gulp-cli`).
 
-Now that you have Node.js installed, you can proceed with installing the Gulp CLI.
+[source,console]
+----
+npm install
+npx gulp
+----
 
-===== Gulp CLI
+The preview is served at http://localhost:3000 while the command runs.
+To build the static site into `gh-pages/` instead, run:
 
-You'll need the Gulp command-line interface (CLI) to run the build.
-The Gulp CLI package provides the `gulp` command which, in turn, executes the version of Gulp declared by the project.
+[source,console]
+----
+./site.sh
+----
 
-You should install the Gulp CLI globally (which resolves to a location in your user directory if you're using nvm) using the following command:
+On every push to `main`, the `.github/workflows/docs.yml` workflow builds
+the Antora site and deploys it to the `gh-pages` branch for GitHub Pages.
 
- $ npm install -g gulp-cli
+== License
 
-Verify the Gulp CLI is installed and on your PATH by running:
-
- $ gulp --version
-
-Now that you have the prerequisites installed, you can fetch and build the UI project.
-
-=== Clone and install the new project
-
-1. Clone the generated project using git.
-2. Use npm to install the project's dependencies inside the project.
-In your terminal, execute the following command:
-
- $ npm install
-
-=== Run and preview the website
-
-To build and preview the project in a local web server, run:
-
- $ npx gulp
-
-You'll see a URL listed in the output of this command:
-
-....
-[16:49:17] Requiring external module @babel/register
-[16:49:18] Using gulpfile ~/your/project/directory/gulpfile.babel.js
-[16:49:18] Starting 'default'...
-[16:49:18] Starting 'removeSite'...
-[16:49:18] Finished 'removeSite' after 20 ms
-[16:49:18] Starting 'removeCache'...
-[16:49:18] Finished 'removeCache' after 1.7 ms
-[16:49:18] Starting 'build'...
-[16:49:20] Finished 'build' after 2.75 s
-[16:49:20] Starting 'serve'...
-[16:49:20] Finished 'serve' after 8.75 ms
-[16:49:20] Starting 'siteWatch'...
-[Browsersync] Access URLs:
- --------------------------------------
-       Local: http://localhost:3000
-    External: http://192.168.0.114:3000
- --------------------------------------
-          UI: http://localhost:3001
- UI External: http://localhost:3001
- --------------------------------------
-[Browsersync] Serving files from: ./gh-pages
-....
-
-Navigate to this URL to preview the site locally.
-
-While this command is running, any changes you make to the source files will be instantly reflected in the browser.
-
-Press `[Ctrl+C]` to stop the preview server and end the continuous build.
-
-=== How to add my new solution pattern to the main page menu
-
-To have your solution pattern listed in the top menu, please open a new issue in
-https://github.com/redhat-solution-patterns/course-ui/issues[this project: https://github.com/redhat-solution-patterns/course-ui/issues].
-
-Make sure to inform:
-
-* Short title
-* Main category (if appropriate). e.g. "Application modernization", "Edge", etc.
-
-=== Learn more
-
-This template is based on the Red Hat Developers scholars courseware template. To learn more, check the build courseware https://redhat-scholars.github.io/build-course[documentation]  on how folder structure, how to use macros and other gotchas.
+Licensed under the Apache License 2.0 — see link:LICENSE[LICENSE].

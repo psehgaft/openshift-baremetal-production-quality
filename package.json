@@ -1,11 +1,10 @@
 {
-  "name": "rhs-openshift-admins-devops",
-  "description": "OpenShift Admins Devops Course Documentation Site",
-  "homepage": "https://redhat-scholars.github.io/openshift-admins-devops",
+  "name": "openshift-baremetal-production-quality",
+  "description": "OpenShift Bare-Metal Production Standard: a standards-aligned production architecture and implementation profile for OpenShift on bare metal",
+  "homepage": "https://github.com/psehgaft/openshift-baremetal-production-quality",
   "author": {
-    "email": "kamesh.sampath@hotmail.com",
-    "name": "Kamesh Sampath",
-    "url": "https://twitter.com/@kamesh_sampath"
+    "name": "Heber Romero T\u00e9llez",
+    "url": "https://github.com/psehgaft"
   },
   "dependencies": {
     "@antora/cli": "^3.1",
@@ -28,7 +27,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/redhat-scholars/openshift-admins-devops.git"
+    "url": "git+https://github.com/psehgaft/openshift-baremetal-production-quality.git"
   },
   "license": "Apache-2.0",
   "babel": {
